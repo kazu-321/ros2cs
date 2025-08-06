@@ -6,7 +6,7 @@
 
 ```
 sudo apt-get update; \
-  sudo apt install mono-complete dotnet-sdk-6.0
+  sudo apt install mono-complete dotnet-sdk-8.0
 ```
 
 

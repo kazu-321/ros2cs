@@ -50,7 +50,7 @@ ANDROID_TOOLCHAIN_NAME=aarch64-linux-android-clang
 PKG_AMENT_LINT=$(echo ament_{lint_common,lint_auto,lint_cmake,flake8,pep257,copyright})
 PKG_TF2="tf2 examples_tf2_py test_tf2 $(echo tf2_{ros,eigen_kdl,kdl,bullet,py,eigen,tools,geometry_msgs,sensor_msgs,ros_py})"
 PKG_TESTS="test_rmw_implementation test_tracetools test_tracetools_launch"
-PKG_IGNORE="${PKG_AMENT_LINT} ${PKG_TF2} ${PKG_TESTS}"
+PKG_IGNORE="${PKG_AMENT_LINT} ${PKG_TF2} ${PKG_TESTS} lttngpy ros2cs_examples"
 PKG_ROS2CS="ros2cs_core ros2cs_common ros2cs_tests ros2cs_examples rosidl_generator_cs"
 
 ROS2CS_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release \
