@@ -280,14 +280,14 @@ namespace ROS2
       string libraryPath = GlobalVariables.absolutePath + libraryFileName;
       string dlopenSearchString = libraryPath;
       Ros2csLogger.GetInstance().LogError("Loading lib: " + dlopenSearchString);
-      IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW | RTLD_GLOBAL);
+      IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW);
       if (ptr == IntPtr.Zero) {
         if (!String.IsNullOrEmpty(GlobalVariables.absolutePath)) {
           // Fallback - look for library in default paths
           var errPtr = dlerror ();
           Ros2csLogger.GetInstance().LogError("Could not find " + dlopenSearchString + ": " + Marshal.PtrToStringAnsi (errPtr) + ". Fallback to " + libraryFileName);
           dlopenSearchString = libraryFileName;
-          ptr = dlopen(dlopenSearchString, RTLD_NOW | RTLD_GLOBAL);
+          ptr = dlopen(dlopenSearchString, RTLD_NOW);
         }
       }      
       if (ptr == IntPtr.Zero) {
