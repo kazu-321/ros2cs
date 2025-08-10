@@ -22,9 +22,19 @@ namespace ROS2
   /// </summary>
   internal static class NativeRcl
   {
-    private static readonly DllLoadUtils dllLoadUtils = DllLoadUtilsFactory.GetDllLoadUtils();
-    private static readonly IntPtr nativeRCL = dllLoadUtils.LoadLibraryNoSuffix("rcl");
-    private static readonly IntPtr nativeRCUtils = dllLoadUtils.LoadLibraryNoSuffix("rcutils");
+    private static DllLoadUtils dllLoadUtils;
+    private static IntPtr nativeRCL;
+    private static IntPtr nativeRCUtils;
+    private static bool initialized = false;
+
+    public static void Init()
+    {
+        if (initialized) return;
+        dllLoadUtils = DllLoadUtilsFactory.GetDllLoadUtils();
+        nativeRCL = dllLoadUtils.LoadLibraryNoSuffix("rcl");
+        nativeRCUtils = dllLoadUtils.LoadLibraryNoSuffix("rcutils");
+        initialized = true;
+    }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate rcl_context_t GetZeroInitializedContextType();

@@ -79,7 +79,7 @@ ROS2CS_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release \
 -Wno-pointer-bool-conversion"
 
 colcon build \
---event-handlers console_stderr+ \
+--event-handlers console_direct+ \
 --packages-ignore ${PKG_IGNORE} ${PKG_ROS2CS} \
 --packages-up-to rmw_fastrtps_cpp \
 --merge-install \
@@ -88,7 +88,7 @@ colcon build \
 --cmake-args ${ROS2CS_CMAKE_ARGS}
 
 colcon build \
---event-handlers console_stderr+ \
+--event-handlers console_direct+ \
 --packages-ignore-regex ${PKG_IGNORE} \
 --merge-install \
 --cmake-clean-cache \

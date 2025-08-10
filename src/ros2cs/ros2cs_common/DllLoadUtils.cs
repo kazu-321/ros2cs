@@ -249,10 +249,10 @@ namespace ROS2
     {
         if (libPreloaded || GlobalVariables.preloadLibraryName == "")
             return;
-        Ros2csLogger.GetInstance().LogDebug("Preloading " + GlobalVariables.preloadLibraryName);
+        Ros2csLogger.GetInstance().LogError("Preloading " + GlobalVariables.preloadLibraryName);
         IntPtr libPtr = Load(GlobalVariables.preloadLibraryName);
 
-        Ros2csLogger.GetInstance().LogDebug("Preloading " + GlobalVariables.preloadLibraryName + " successful.");
+        Ros2csLogger.GetInstance().LogError("Preloading " + GlobalVariables.preloadLibraryName + " successful.");
 
         libPreloaded = true;
     }
@@ -280,17 +280,18 @@ namespace ROS2
       string libraryPath = GlobalVariables.absolutePath + libraryFileName;
       string dlopenSearchString = libraryPath;
       Ros2csLogger.GetInstance().LogError("Loading lib: " + dlopenSearchString);
-      IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW);
+      IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW | RTLD_GLOBAL);
       if (ptr == IntPtr.Zero) {
         if (!String.IsNullOrEmpty(GlobalVariables.absolutePath)) {
           // Fallback - look for library in default paths
           var errPtr = dlerror ();
           Ros2csLogger.GetInstance().LogError("Could not find " + dlopenSearchString + ": " + Marshal.PtrToStringAnsi (errPtr) + ". Fallback to " + libraryFileName);
           dlopenSearchString = libraryFileName;
-          ptr = dlopen(dlopenSearchString, RTLD_NOW);
+          ptr = dlopen(dlopenSearchString, RTLD_NOW | RTLD_GLOBAL);
         }
       }      
       if (ptr == IntPtr.Zero) {
+        Ros2csLogger.GetInstance().LogError("Failed to load library: " + dlopenSearchString);
         throw new UnsatisfiedLinkError(dlopenSearchString);
       }
       Ros2csLogger.GetInstance().LogError("Loaded library: " + dlopenSearchString);

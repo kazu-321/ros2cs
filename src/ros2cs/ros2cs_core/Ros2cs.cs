@@ -51,6 +51,8 @@ namespace ROS2
           return;
         }
 
+        NativeRcl.Init();
+        
         default_allocator = NativeRcl.rcutils_get_default_allocator();
         global_context = NativeRcl.rcl_get_zero_initialized_context();
         Utils.CheckReturnEnum(NativeRclInterface.rclcs_init(ref global_context, default_allocator));
