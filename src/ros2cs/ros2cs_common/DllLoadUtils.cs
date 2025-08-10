@@ -310,6 +310,7 @@ namespace ROS2
 
     public IntPtr LoadLibraryNoSuffix(string fileName) {
       string libraryName = "lib" + fileName + ".so";
+      Ros2csLogger.GetInstance().LogDebug("Loading library without suffix: " + libraryName);
       return LoadLibraryByName(libraryName);
     }
   }
