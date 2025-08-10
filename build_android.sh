@@ -44,7 +44,7 @@ done
 echo $MSG
 
 ANDROID_ABI=arm64-v8a
-ANDROID_NATIVE_API_LEVEL=28
+ANDROID_NATIVE_API_LEVEL=35
 ANDROID_TOOLCHAIN_NAME=aarch64-linux-android-clang
 
 PKG_AMENT_LINT=$(echo ament_{lint_common,lint_auto,lint_cmake,flake8,pep257,copyright})

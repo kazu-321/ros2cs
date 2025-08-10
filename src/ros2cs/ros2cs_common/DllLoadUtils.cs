@@ -264,7 +264,7 @@ namespace ROS2
     public IntPtr GetProcAddress (IntPtr dllHandle, string name) {
       // clear previous errors if any
       dlerror();
-      Ros2csLogger.GetInstance().LogDebug($"[DllLoadUtilsUnix] dlsym: handle={dllHandle}, symbol={name}");
+      Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] dlsym: handle={dllHandle}, symbol={name}");
       var res = dlsym(dllHandle, name);
       var errPtr = dlerror();
       if (errPtr != IntPtr.Zero) {
@@ -272,20 +272,20 @@ namespace ROS2
         Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] dlsym failed: handle={dllHandle}, symbol={name}, error={errMsg}");
         throw new Exception($"dlsym: {errMsg} (handle={dllHandle}, symbol={name})");
       }
-      Ros2csLogger.GetInstance().LogDebug($"[DllLoadUtilsUnix] dlsym success: handle={dllHandle}, symbol={name}, addr={res}");
+      Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] dlsym success: handle={dllHandle}, symbol={name}, addr={res}");
       return res;
     }
 
     private IntPtr Load(string libraryFileName) {
       string libraryPath = GlobalVariables.absolutePath + libraryFileName;
       string dlopenSearchString = libraryPath;
-      Ros2csLogger.GetInstance().LogDebug("Loading lib: " + dlopenSearchString);
+      Ros2csLogger.GetInstance().LogError("Loading lib: " + dlopenSearchString);
       IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW);
       if (ptr == IntPtr.Zero) {
         if (!String.IsNullOrEmpty(GlobalVariables.absolutePath)) {
           // Fallback - look for library in default paths
           var errPtr = dlerror ();
-          Ros2csLogger.GetInstance().LogDebug("Could not find " + dlopenSearchString + ": " + Marshal.PtrToStringAnsi (errPtr) + ". Fallback to " + libraryFileName);
+          Ros2csLogger.GetInstance().LogError("Could not find " + dlopenSearchString + ": " + Marshal.PtrToStringAnsi (errPtr) + ". Fallback to " + libraryFileName);
           dlopenSearchString = libraryFileName;
           ptr = dlopen(dlopenSearchString, RTLD_NOW);
         }
@@ -293,7 +293,7 @@ namespace ROS2
       if (ptr == IntPtr.Zero) {
         throw new UnsatisfiedLinkError(dlopenSearchString);
       }
-      Ros2csLogger.GetInstance().LogDebug("Loaded library: " + dlopenSearchString);
+      Ros2csLogger.GetInstance().LogError("Loaded library: " + dlopenSearchString);
       return ptr;
     }
 
@@ -310,7 +310,7 @@ namespace ROS2
 
     public IntPtr LoadLibraryNoSuffix(string fileName) {
       string libraryName = "lib" + fileName + ".so";
-      Ros2csLogger.GetInstance().LogDebug("Loading library without suffix: " + libraryName);
+      Ros2csLogger.GetInstance().LogError("Loading library without suffix: " + libraryName);
       return LoadLibraryByName(libraryName);
     }
   }
