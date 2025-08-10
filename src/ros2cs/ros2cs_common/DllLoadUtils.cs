@@ -263,12 +263,16 @@ namespace ROS2
 
     public IntPtr GetProcAddress (IntPtr dllHandle, string name) {
       // clear previous errors if any
-      dlerror ();
-      var res = dlsym (dllHandle, name);
-      var errPtr = dlerror ();
+      dlerror();
+      Ros2csLogger.GetInstance().LogDebug($"[DllLoadUtilsUnix] dlsym: handle={dllHandle}, symbol={name}");
+      var res = dlsym(dllHandle, name);
+      var errPtr = dlerror();
       if (errPtr != IntPtr.Zero) {
-        throw new Exception ("dlsym: " + Marshal.PtrToStringAnsi (errPtr));
+        string errMsg = Marshal.PtrToStringAnsi(errPtr);
+        Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] dlsym failed: handle={dllHandle}, symbol={name}, error={errMsg}");
+        throw new Exception($"dlsym: {errMsg} (handle={dllHandle}, symbol={name})");
       }
+      Ros2csLogger.GetInstance().LogDebug($"[DllLoadUtilsUnix] dlsym success: handle={dllHandle}, symbol={name}, addr={res}");
       return res;
     }
 
