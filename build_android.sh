@@ -72,7 +72,8 @@ ROS2CS_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release \
 -DTHIRDPARTY_Asio=FORCE \
 -DCOMPILE_EXAMPLES=OFF \
 -DBUILD_TESTING=OFF \
--DCMAKE_SHARED_LINKER_FLAGS="-Wl,-rpath,'\$ORIGIN',-rpath=.,--disable-new-dtags" \
+-DCMAKE_EXE_LINKER_FLAGS="-Wl,-z,max-page-size=16384,-z,common-page-size=16384"
+-DCMAKE_SHARED_LINKER_FLAGS="-Wl,-rpath,'$ORIGIN',-rpath=.,--disable-new-dtags,-z,max-page-size=16384,-z,common-page-size=16384"
 -DCMAKE_FIND_ROOT_PATH=${PWD}/install/ \
 --no-warn-unused-cli \
 -Wno-deprecated \

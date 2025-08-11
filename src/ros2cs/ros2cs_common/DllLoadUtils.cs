@@ -264,28 +264,46 @@ namespace ROS2
     public IntPtr GetProcAddress (IntPtr dllHandle, string name) {
       // clear previous errors if any
       dlerror();
-      Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] dlsym: handle={dllHandle}, symbol={name}");
+      Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] dlsym: handle={dllHandle}, symbol={name}");
       var res = dlsym(dllHandle, name);
       var errPtr = dlerror();
       if (errPtr != IntPtr.Zero) {
         string errMsg = Marshal.PtrToStringAnsi(errPtr);
-        Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] dlsym failed: handle={dllHandle}, symbol={name}, error={errMsg}");
+        // 追加情報: 現在のディレクトリ、環境変数、ロード済みライブラリ一覧
+        string cwd = System.IO.Directory.GetCurrentDirectory();
+        string envPath = Environment.GetEnvironmentVariable("LD_LIBRARY_PATH");
+        string envAndroidRoot = Environment.GetEnvironmentVariable("ANDROID_ROOT");
+        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] dlsym failed: handle={dllHandle}, symbol={name}, error={errMsg}");
+        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] CWD: {cwd}");
+        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] LD_LIBRARY_PATH: {envPath}");
+        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] ANDROID_ROOT: {envAndroidRoot}");
+        // ロード済みライブラリ一覧 (proc/self/maps)
+        // try {
+        //   string maps = System.IO.File.ReadAllText("/proc/self/maps");
+        //   foreach (var line in maps.Split('\n')) {
+        //     if (line.Contains(".so")) {
+        //       Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] loaded: {line.Trim()}");
+        //     }
+        //   }
+        // } catch (Exception e) {
+        //   Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] Could not read /proc/self/maps: {e.Message}");
+        // }
         throw new Exception($"dlsym: {errMsg} (handle={dllHandle}, symbol={name})");
       }
-      Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] dlsym success: handle={dllHandle}, symbol={name}, addr={res}");
+      Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] dlsym success: handle={dllHandle}, symbol={name}, addr={res}");
       return res;
     }
 
     private IntPtr Load(string libraryFileName) {
       string libraryPath = GlobalVariables.absolutePath + libraryFileName;
       string dlopenSearchString = libraryPath;
-      Ros2csLogger.GetInstance().LogError("Loading lib: " + dlopenSearchString);
+      Ros2csLogger.GetInstance().LogInfo("Loading lib: " + dlopenSearchString);
       IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW);
       if (ptr == IntPtr.Zero) {
         if (!String.IsNullOrEmpty(GlobalVariables.absolutePath)) {
           // Fallback - look for library in default paths
           var errPtr = dlerror ();
-          Ros2csLogger.GetInstance().LogError("Could not find " + dlopenSearchString + ": " + Marshal.PtrToStringAnsi (errPtr) + ". Fallback to " + libraryFileName);
+          Ros2csLogger.GetInstance().LogInfo("Could not find " + dlopenSearchString + ": " + Marshal.PtrToStringAnsi (errPtr) + ". Fallback to " + libraryFileName);
           dlopenSearchString = libraryFileName;
           ptr = dlopen(dlopenSearchString, RTLD_NOW);
         }
@@ -294,7 +312,7 @@ namespace ROS2
         Ros2csLogger.GetInstance().LogError("Failed to load library: " + dlopenSearchString);
         throw new UnsatisfiedLinkError(dlopenSearchString);
       }
-      Ros2csLogger.GetInstance().LogError("Loaded library: " + dlopenSearchString);
+      Ros2csLogger.GetInstance().LogInfo("Loaded library: " + dlopenSearchString);
       return ptr;
     }
 
@@ -311,7 +329,7 @@ namespace ROS2
 
     public IntPtr LoadLibraryNoSuffix(string fileName) {
       string libraryName = "lib" + fileName + ".so";
-      Ros2csLogger.GetInstance().LogError("Loading library without suffix: " + libraryName);
+      Ros2csLogger.GetInstance().LogInfo("Loading library without suffix: " + libraryName);
       return LoadLibraryByName(libraryName);
     }
   }

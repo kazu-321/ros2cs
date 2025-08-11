@@ -42,8 +42,16 @@ namespace ROS2
         EnsureMainThread();
         if (initialized) return;
         dllLoadUtils = dllLoadUtils ?? DllLoadUtilsFactory.GetDllLoadUtils();
-        if (nativeRCL == IntPtr.Zero) nativeRCL = dllLoadUtils.LoadLibraryNoSuffix("rcl");
-        if (nativeRCUtils == IntPtr.Zero) nativeRCUtils = dllLoadUtils.LoadLibraryNoSuffix("rcutils");
+        if (nativeRCL == IntPtr.Zero)
+        {
+            nativeRCL = dllLoadUtils.LoadLibraryNoSuffix("rcl");
+            Ros2csLogger.GetInstance().LogInfo( $"[NativeRcl] Loaded rcl: handle={nativeRCL}");
+        }
+        if (nativeRCUtils == IntPtr.Zero)
+        {
+            nativeRCUtils = dllLoadUtils.LoadLibraryNoSuffix("rcutils");
+            Ros2csLogger.GetInstance().LogInfo($"[NativeRcl] Loaded rcutils: handle={nativeRCUtils}");
+        }
         initialized = true;
     }
 
