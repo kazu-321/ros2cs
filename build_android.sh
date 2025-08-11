@@ -51,7 +51,7 @@ PKG_AMENT_LINT=$(echo ament_{lint_common,lint_auto,lint_cmake,flake8,pep257,copy
 PKG_TF2="tf2 examples_tf2_py test_tf2 $(echo tf2_{ros,eigen_kdl,kdl,bullet,py,eigen,tools,geometry_msgs,sensor_msgs,ros_py})"
 PKG_TESTS="test_rmw_implementation test_tracetools test_tracetools_launch"
 PKG_IGNORE="${PKG_AMENT_LINT} ${PKG_TF2} ${PKG_TESTS} lttngpy ros2cs_examples"
-PKG_ROS2CS="ros2cs_core ros2cs_common ros2cs_tests ros2cs_examples rosidl_generator_cs"
+PKG_ROS2CS="ros2cs_core ros2cs_common ros2cs_tests ros2cs_examples rosidl_generator_cs rcutils rcl"
 
 ROS2CS_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release \
 -DFOONATHAN_MEMORY_FORCE_VENDORED_BUILD=ON \
@@ -72,25 +72,35 @@ ROS2CS_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release \
 -DTHIRDPARTY_Asio=FORCE \
 -DCOMPILE_EXAMPLES=OFF \
 -DBUILD_TESTING=OFF \
--DCMAKE_EXE_LINKER_FLAGS="-Wl,-z,max-page-size=16384,-z,common-page-size=16384"
--DCMAKE_SHARED_LINKER_FLAGS="-Wl,-rpath,'$ORIGIN',-rpath=.,--disable-new-dtags,-z,max-page-size=16384,-z,common-page-size=16384"
 -DCMAKE_FIND_ROOT_PATH=${PWD}/install/ \
 --no-warn-unused-cli \
 -Wno-deprecated \
+-DCMAKE_SHARED_LINKER_FLAGS="-Wl,-rpath,'$ORIGIN',-rpath=.,--disable-new-dtags" \
 -Wno-pointer-bool-conversion"
 
-colcon build \
---event-handlers console_direct+ \
---packages-ignore ${PKG_IGNORE} ${PKG_ROS2CS} \
---packages-up-to rmw_fastrtps_cpp \
---merge-install \
---cmake-clean-cache \
---catkin-skip-building-tests \
---cmake-args ${ROS2CS_CMAKE_ARGS}
+# -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-rpath,'$ORIGIN',-rpath=.,--disable-new-dtags,-z,max-page-size=16384,-z,common-page-size=16384" \
+# -DCMAKE_EXE_LINKER_FLAGS="-Wl,-z,max-page-size=16384,-z,common-page-size=16384" \
+
+# colcon build \
+# --event-handlers console_direct+ \
+# --packages-ignore ${PKG_IGNORE} ${PKG_ROS2CS} \
+# --packages-up-to rmw_fastrtps_cpp \
+# --merge-install \
+# --cmake-clean-cache \
+# --catkin-skip-building-tests \
+# --cmake-args ${ROS2CS_CMAKE_ARGS}
+
+# colcon build \
+# --event-handlers console_direct+ \
+# --packages-ignore-regex ${PKG_IGNORE} \
+# --merge-install \
+# --cmake-clean-cache \
+# --catkin-skip-building-tests \
+# --cmake-args ${ROS2CS_CMAKE_ARGS} 
 
 colcon build \
 --event-handlers console_direct+ \
---packages-ignore-regex ${PKG_IGNORE} \
+--packages-select ${PKG_ROS2CS} \
 --merge-install \
 --cmake-clean-cache \
 --catkin-skip-building-tests \

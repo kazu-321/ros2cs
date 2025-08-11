@@ -239,6 +239,7 @@ namespace ROS2
     [DllImport ("libdl.so", ExactSpelling = true)]
     private static extern IntPtr dlerror ();
 
+    const int RTLD_LAZY = 0x00001;
     const int RTLD_NOW = 0x00002;
     const int RTLD_DEEPBIND = 0x00008;
     const int RTLD_GLOBAL = 0x00100;
@@ -264,32 +265,40 @@ namespace ROS2
 
     public IntPtr GetProcAddress (IntPtr dllHandle, string name) {
       // clear previous errors if any
+      dlopen("libdl.so", RTLD_LAZY | RTLD_GLOBAL);
+      dlopen("libm.so", RTLD_LAZY | RTLD_GLOBAL);
+      dlopen("libc.so", RTLD_LAZY | RTLD_GLOBAL);
+      Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] dlsym: load start.");
       dlerror();
       Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] dlsym: handle={dllHandle}, symbol={name}");
       var res = dlsym(dllHandle, name);
       var errPtr = dlerror();
       if (errPtr != IntPtr.Zero) {
-        string errMsg = Marshal.PtrToStringAnsi(errPtr);
-        // 追加情報: 現在のディレクトリ、環境変数、ロード済みライブラリ一覧
-        string cwd = System.IO.Directory.GetCurrentDirectory();
-        string envPath = Environment.GetEnvironmentVariable("LD_LIBRARY_PATH");
-        string envAndroidRoot = Environment.GetEnvironmentVariable("ANDROID_ROOT");
-        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] dlsym failed: handle={dllHandle}, symbol={name}, error={errMsg}");
-        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] CWD: {cwd}");
-        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] LD_LIBRARY_PATH: {envPath}");
-        Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] ANDROID_ROOT: {envAndroidRoot}");
-        // ロード済みライブラリ一覧 (proc/self/maps)
-        // try {
-        //   string maps = System.IO.File.ReadAllText("/proc/self/maps");
-        //   foreach (var line in maps.Split('\n')) {
-        //     if (line.Contains(".so")) {
-        //       Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] loaded: {line.Trim()}");
-        //     }
-        //   }
-        // } catch (Exception e) {
-        //   Ros2csLogger.GetInstance().LogError($"[DllLoadUtilsUnix] Could not read /proc/self/maps: {e.Message}");
-        // }
-        throw new Exception($"dlsym: {errMsg} (handle={dllHandle}, symbol={name})");
+          string errMsg = Marshal.PtrToStringAnsi(errPtr);
+          string cwd = System.IO.Directory.GetCurrentDirectory();
+          string envPath = Environment.GetEnvironmentVariable("LD_LIBRARY_PATH");
+          string envAndroidRoot = Environment.GetEnvironmentVariable("ANDROID_ROOT");
+          string loadedLibs = "";
+          try {
+            string maps = System.IO.File.ReadAllText("/proc/self/maps");
+            var soSet = new System.Collections.Generic.HashSet<string>();
+            foreach (var line in maps.Split('\n')) {
+              if (string.IsNullOrWhiteSpace(line)) continue;
+              var match = System.Text.RegularExpressions.Regex.Match(line, @"/[^\s]*/lib[^\s]*\.so(\.[^\s]*)?");
+              if (match.Success) {
+                var soName = System.IO.Path.GetFileName(match.Value);
+                if (!string.IsNullOrWhiteSpace(soName) && !soSet.Contains(soName)) {
+                  soSet.Add(soName);
+                }
+              }
+            }
+            loadedLibs = string.Join(", ", soSet);
+          } catch (Exception e) {
+            loadedLibs = $"Could not read /proc/self/maps: {e.Message}";
+          }
+          string logMsg = $"[DllLoadUtilsUnix] dlsym failed: handle={dllHandle}, symbol={name}, CWD: {cwd}, LD_LIBRARY_PATH: {envPath}, ANDROID_ROOT: {envAndroidRoot}, Loaded libraries: {loadedLibs}";
+          Ros2csLogger.GetInstance().LogInfo(logMsg);
+          throw new Exception($"dlsym: {errMsg} (handle={dllHandle}, symbol={name})");
       }
       Ros2csLogger.GetInstance().LogInfo($"[DllLoadUtilsUnix] dlsym success: handle={dllHandle}, symbol={name}, addr={res}");
       return res;
