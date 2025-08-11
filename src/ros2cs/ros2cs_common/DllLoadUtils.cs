@@ -241,6 +241,7 @@ namespace ROS2
 
     const int RTLD_NOW = 0x00002;
     const int RTLD_DEEPBIND = 0x00008;
+    const int RTLD_GLOBAL = 0x00100;
 
     //TODO (adamdbrw) Somewhat hacky solution to open (and dereference) the problematic library
     //that otherwise causes crashes in Unity Editor.
@@ -298,14 +299,14 @@ namespace ROS2
       string libraryPath = GlobalVariables.absolutePath + libraryFileName;
       string dlopenSearchString = libraryPath;
       Ros2csLogger.GetInstance().LogInfo("Loading lib: " + dlopenSearchString);
-      IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW);
+      IntPtr ptr = dlopen(dlopenSearchString, RTLD_NOW | RTLD_GLOBAL);
       if (ptr == IntPtr.Zero) {
         if (!String.IsNullOrEmpty(GlobalVariables.absolutePath)) {
           // Fallback - look for library in default paths
           var errPtr = dlerror ();
           Ros2csLogger.GetInstance().LogInfo("Could not find " + dlopenSearchString + ": " + Marshal.PtrToStringAnsi (errPtr) + ". Fallback to " + libraryFileName);
           dlopenSearchString = libraryFileName;
-          ptr = dlopen(dlopenSearchString, RTLD_NOW);
+        ptr = dlopen(dlopenSearchString, RTLD_NOW | RTLD_GLOBAL);
         }
       }      
       if (ptr == IntPtr.Zero) {
