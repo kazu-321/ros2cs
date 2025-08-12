@@ -72,7 +72,6 @@ ROS2CS_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release \
 -DTHIRDPARTY_Asio=FORCE \
 -DCOMPILE_EXAMPLES=OFF \
 -DBUILD_TESTING=OFF \
--DCMAKE_SHARED_LINKER_FLAGS="-Wl,-rpath,'\$ORIGIN',-rpath=.,--disable-new-dtags" \
 -DCMAKE_FIND_ROOT_PATH=${PWD}/install/ \
 --no-warn-unused-cli \
 -Wno-deprecated \
@@ -80,7 +79,17 @@ ROS2CS_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release \
 
 colcon build \
 --event-handlers console_stderr+ \
---packages-ignore ${PKG_IGNORE} \
+--packages-ignore ${PKG_IGNORE} ${PKG_ROS2CS} \
+--packages-up-to rmw_fastrtps_cpp \
 --merge-install \
 --cmake-clean-cache \
+--catkin-skip-building-tests \
 --cmake-args ${ROS2CS_CMAKE_ARGS}
+
+colcon build \
+--event-handlers console_stderr+ \
+--packages-ignore-regex ${PKG_IGNORE} \
+--merge-install \
+--cmake-clean-cache \
+--catkin-skip-building-tests \
+--cmake-args ${ROS2CS_CMAKE_ARGS} 
